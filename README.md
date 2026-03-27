@@ -26,6 +26,7 @@ The competition target follows an exact physical identity:
    - `Wind_power`: mean `2,881.28`, std `2,415.05`, min `21`, max `13,552`
 
 ## TRY #1:
+
 I tried two different approaches:
   * **Approach 1 (Direct Forecasting):** Trains a single `HistGradientBoostingRegressor` directly against the target balance.
   * **Approach 2 (Component Forecasting):** Trains separated specialized models for Load, Solar, and Wind individually (using Linear & Tree models), then mathematically subtracts them to derive the target balance.
