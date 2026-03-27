@@ -7,7 +7,7 @@ def clean_and_interpolate(df: pd.DataFrame, is_train: bool = True) -> pd.DataFra
     """
     df = df.copy()
     
-    # 1. Parse dates and expose missing time steps
+    # 1. Parse dates and expose missing time steps / intervals
     df['date'] = pd.to_datetime(df['date'])
     df = df.set_index('date')
     df = df.sort_index()
@@ -58,16 +58,17 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.copy()
     
-    # 1. Cyclical Time Features
+    # 1. Cyclical Time Features; these are typical calendar features
     df['tod_sin'] = np.sin(2 * np.pi * df['tod'] / 48.0)
     df['tod_cos'] = np.cos(2 * np.pi * df['tod'] / 48.0)
     
     df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12.0)
     df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12.0)
     
-    # 2. Lag Features (Weather features only)
+    # 2. Lag Features (Weather features only); We can add more lag features here. Since we have weather forecast, technically we can also try lead features
     for col in ['temperature', 'nebulosity', 'wind']:
-        df[f'{col}_lag_1d'] = df[col].shift(48)
+        df[f'{col}_lag_1d'] = df[col].shift(24)
+        df[f'{col}_lag_2d'] = df[col].shift(48)
         df[f'{col}_lag_1w'] = df[col].shift(336)
         
     # 3. Rolling Window Statistics (6 Hours = 12 half-hours)
