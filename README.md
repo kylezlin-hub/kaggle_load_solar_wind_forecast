@@ -36,6 +36,7 @@ Results: `baseline_models.py` empirically demonstrates **Approach 1 (Direct Fore
 While Component forecasting is physically intuitive, it suffers from heavy *compounding errors*. Furthermore, sophisticated Tree models in the Direct approach easily capture dynamic real-world caps—such as wind turbine "cut-out" speeds where energy production drops rapidly to $0$ at very high wind velocities—which sub-models struggle to isolate securely.
 
 ## TRY #2:
+
 Try different ways to improve model at component level: LOAD, SOLAR and WIND.  Comppppounding errors significantly reduced. Component forecasting approach is the final winner after fine tuning each model.
 ==========================================================================================
 FINAL COMPARISON SUMMARY
