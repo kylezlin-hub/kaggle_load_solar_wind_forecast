@@ -1,0 +1,14 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^python -c \"\nimport pandas as pd\nimport numpy as np\n\ntrain = pd\\.read_csv\\(r'c:\\\\kaggle_load_solar_wind_forecast\\\\data\\\\train\\.csv'\\)\n\nprint\\('=== CATEGORICAL / FLAG COLUMNS ==='\\)\nfor col in \\['month','tod','day_type_week','day_type_jf','day_type_week_jf','period_hour_changed','period_holiday','period_christmas','period_summer'\\]:\n    print\\(f'\\{col\\}: \\{sorted\\(train\\[col\\]\\.unique\\(\\)\\)\\}'\\)\n\nprint\\(\\)\nprint\\('=== TARGET COMPONENTS CHECK ==='\\)\n# Electricity_balance = Load - Solar_power - Wind_power \\?\ntrain\\['calc_balance'\\] = train\\['Load'\\] - train\\['Solar_power'\\] - train\\['Wind_power'\\]\ndiff = \\(train\\['calc_balance'\\] - train\\['Electricity_balance_not_controllable'\\]\\)\\.abs\\(\\)\nprint\\(f'Load - Solar - Wind == Balance\\? max_diff=\\{diff\\.max\\(\\):\\.4f\\}, mean_diff=\\{diff\\.mean\\(\\):\\.6f\\}'\\)\n\nprint\\(\\)\nprint\\('=== YEARLY STATS \\(Load\\) ==='\\)\ntrain\\['year'\\] = train\\['year'\\]\\.astype\\(int\\)\nprint\\(train\\.groupby\\('year'\\)\\['Load'\\]\\.agg\\(\\['mean','std','min','max'\\]\\)\\.round\\(0\\)\\)\n\nprint\\(\\)\nprint\\('=== SEASONAL PATTERN \\(mean Load by month\\) ==='\\)\nprint\\(train\\.groupby\\('month'\\)\\['Load'\\]\\.mean\\(\\)\\.round\\(0\\)\\)\n\"\n$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python -c \"import sys; print\\(sys\\.version\\); import importlib; pkgs=\\['pandas','numpy','matplotlib','seaborn','scikit-learn','lightgbm','xgboost','jupyter'\\]; \\[print\\(p, 'OK' if importlib\\.util\\.find_spec\\(p\\.replace\\('-','_'\\)\\.split\\('\\['\\)\\[0\\]\\) else 'MISSING'\\) for p in pkgs\\]\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
+}
