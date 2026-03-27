@@ -38,7 +38,8 @@ While Component forecasting is physically intuitive, it suffers from heavy *comp
 ## TRY #2:
 
 Try different ways to improve model at component level: LOAD, SOLAR and WIND.  Comppppounding errors significantly reduced. Component forecasting approach is the final winner after fine tuning each model.
-==========================================================================================
+
+------------------------------------------------------------------------------------------
 FINAL COMPARISON SUMMARY
 ==========================================================================================
 
