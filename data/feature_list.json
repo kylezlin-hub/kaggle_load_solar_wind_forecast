@@ -29,7 +29,8 @@
     "cdd",
     "solar_potential",
     "solar_tod_inter",
-    "wind_potential"
+    "wind_potential",
+    "wind_potential2"
   ],
   "target": "Electricity_balance_not_controllable"
 }
