@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
+import argparse
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.ensemble import HistGradientBoostingRegressor
-from sklearn.linear_model import LinearRegression
 from data_pipeline import clean_and_interpolate, create_features
 
 # Suppress sklearn warnings for clean output
@@ -11,8 +10,43 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-def train_and_compare():
+def build_model(model_type: str, random_state: int = 42):
+    """Return a tree-based regressor based on selected backend."""
+    model_type = model_type.lower()
+
+    if model_type == "lgbm":
+        from lightgbm import LGBMRegressor
+
+        return LGBMRegressor(
+            n_estimators=500,
+            learning_rate=0.05,
+            num_leaves=63,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=random_state,
+            n_jobs=-1,
+        )
+
+    if model_type == "xgb":
+        from xgboost import XGBRegressor
+
+        return XGBRegressor(
+            n_estimators=500,
+            learning_rate=0.05,
+            max_depth=8,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            objective="reg:squarederror",
+            random_state=random_state,
+            n_jobs=-1,
+        )
+
+    raise ValueError("model_type must be one of: 'lgbm', 'xgb'")
+
+
+def train_and_compare(model_type: str = "lgbm"):
     train_path = r"c:\kaggle_load_solar_wind_forecast\data\train.csv"
+    print(f"Using model backend: {model_type.upper()}")
     print("Loading and cleaning data...")
     df = pd.read_csv(train_path)
     df = clean_and_interpolate(df, is_train=True)
@@ -74,7 +108,7 @@ def train_and_compare():
     X_val_dir = val_df[base_features]
     y_val_dir = val_df[target_direct]
 
-    model_direct = HistGradientBoostingRegressor(random_state=42, max_iter=100)
+    model_direct = build_model(model_type, random_state=42)
     model_direct.fit(X_train_dir, y_train_dir)
 
     preds_direct = model_direct.predict(X_val_dir)
@@ -104,13 +138,13 @@ def train_and_compare():
         "temperature_lag_1w",
     ] """
     load_features = base_features  # Using all features for load as well
-    model_load = HistGradientBoostingRegressor(random_state=42, max_iter=100)
+    model_load = build_model(model_type, random_state=42)
     model_load.fit(train_df[load_features], train_df["Load"])
     preds_load = model_load.predict(val_df[load_features])
 
     # Sub-model 2: Solar (depends heavily on nebulosity, tod)
     solar_features = ["nebulosity", "nebulosity_by_solar_power_weights", "tod", "month"]
-    model_solar = HistGradientBoostingRegressor(random_state=42, max_iter=100)
+    model_solar = build_model(model_type, random_state=42)
     model_solar.fit(train_df[solar_features], train_df["Solar_power"])
     preds_solar = model_solar.predict(val_df[solar_features])
 
@@ -123,7 +157,7 @@ def train_and_compare():
         "wind_sq",
         "wind_cube",
     ]
-    model_wind = LinearRegression()
+    model_wind = build_model(model_type, random_state=42)
     model_wind.fit(train_df[wind_features], train_df["Wind_power"])
     preds_wind = model_wind.predict(val_df[wind_features])
 
@@ -142,5 +176,5 @@ def train_and_compare():
         print(f"Approach 1 (Direct) is BETTER by {mae_comp - mae_direct:.2f} MAE.")
 
 
-if __name__ == "__main__":
-    train_and_compare()
+# choices=["lgbm", "xgb"],
+train_and_compare(model_type="lgbm")
