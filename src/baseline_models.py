@@ -41,7 +41,19 @@ def build_model(model_type: str, random_state: int = 42):
             n_jobs=-1,
         )
 
-    raise ValueError("model_type must be one of: 'lgbm', 'xgb'")
+    if model_type == "rf":
+        from sklearn.ensemble import RandomForestRegressor
+
+        return RandomForestRegressor(
+            n_estimators=300,
+            max_depth=None,
+            min_samples_leaf=2,
+            max_features="sqrt",
+            random_state=random_state,
+            n_jobs=-1,
+        )
+
+    raise ValueError("model_type must be one of: 'lgbm', 'xgb', 'rf'")
 
 
 def train_and_compare(model_type: str = "lgbm"):
@@ -176,5 +188,7 @@ def train_and_compare(model_type: str = "lgbm"):
         print(f"Approach 1 (Direct) is BETTER by {mae_comp - mae_direct:.2f} MAE.")
 
 
-# choices=["lgbm", "xgb"],
+# choices=["lgbm", "xgb", "rf"],
 train_and_compare(model_type="lgbm")
+train_and_compare(model_type="xgb")
+train_and_compare(model_type="rf")
