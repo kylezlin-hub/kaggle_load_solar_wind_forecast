@@ -1,6 +1,6 @@
 # Kaggle Electricity Balance (Load - Renewable) Forecast 
 
-This is a self-study project based on data from the Kaggle competition “Not Controllable Electricity Balance Forecast.” The goal is to strengthen my machine learning skills and explore how AI/ML can be applied in the energy sector.
+This is a self-directed learning project based on the Kaggle competition “Not Controllable Electricity Balance Forecast”. The objective was to strengthen my machine learning skills and explore the application of AI/ML techniques in the energy sector. 
 
 This repository contains an end-to-end data processing and machine learning solution for forecasting `Electricity_balance_not_controllable` based on weather conditions (temperature, nebulosity, wind) and calendar data. 
 
