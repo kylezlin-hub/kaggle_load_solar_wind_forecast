@@ -73,7 +73,7 @@ MAE/Mean Ratio                     5.19%                  4.66%    —
 - `02_features.ipynb`: feature engineering pipeline and feature export
 - `03_model_lgbm.ipynb`: LightGBM baseline with time-based validation and submission generation. Compared two approaches
 
-## Additional Results Snapshot (2026-06-25)
+## Additional Results Snapshot (2026-06)
 
 Below are additional diagnostics generated from the submission files currently in this repo:
 
