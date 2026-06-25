@@ -73,3 +73,72 @@ MAE/Mean Ratio                     5.19%                  4.66%    —
 - `02_features.ipynb`: feature engineering pipeline and feature export
 - `03_model_lgbm.ipynb`: LightGBM baseline with time-based validation and submission generation. Compared two approaches
 
+## Additional Results Snapshot (2026-06-25)
+
+Below are additional diagnostics generated from the submission files currently in this repo:
+
+- `data/submission_approach1_direct.csv`
+- `data/submission_approach2_component.csv`
+- `data/submission_lgbm_baseline.csv`
+- `data/submission.csv`
+
+All summary artifacts are saved in:
+
+- `docs/submission_stats.csv`
+- `docs/submission_agreement.csv`
+
+### Submission Distribution Summary
+
+| Submission | Rows | Mean (MW) | Std (MW) | Min | P05 | Median | P95 | Max |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| component | 17,520 | 46,950.77 | 10,836.27 | 24,258.32 | 32,430.41 | 44,486.98 | 67,520.33 | 83,500.17 |
+| direct | 17,520 | 46,718.18 | 10,876.00 | 25,904.60 | 32,375.08 | 43,917.75 | 67,352.32 | 81,501.59 |
+| final_submission | 17,520 | 47,016.24 | 10,446.88 | 25,508.18 | 32,885.01 | 44,952.16 | 67,298.09 | 82,004.13 |
+| lgbm_baseline | 17,520 | 46,718.18 | 10,876.00 | 25,904.60 | 32,375.08 | 43,917.75 | 67,352.32 | 81,501.59 |
+
+### Pairwise Submission Agreement
+
+Vector agreement is measured using MAE between two prediction vectors and Pearson correlation:
+
+| Left | Right | MAE Between Predictions (MW) | Correlation |
+|---|---|---:|---:|
+| direct | lgbm_baseline | 0.00 | 1.0000 |
+| direct | component | 1,005.19 | 0.9930 |
+| component | lgbm_baseline | 1,005.19 | 0.9930 |
+| component | final_submission | 1,859.65 | 0.9709 |
+| direct | final_submission | 1,973.72 | 0.9688 |
+| lgbm_baseline | final_submission | 1,973.72 | 0.9688 |
+
+Observation: `submission_lgbm_baseline.csv` and `submission_approach1_direct.csv` are identical in this repository snapshot.
+
+### New Graphs
+
+#### Forecast Comparison (First 14 Days)
+
+This chart helps visually compare how each approach tracks intra-day and day-to-day swings early in the test year.
+
+![Submission comparison first 14 days](docs/figures/submission_first_14_days.png)
+
+#### Prediction Distribution Comparison
+
+Useful to detect over-smoothing, extreme tails, and central tendency shifts between approaches.
+
+![Submission distribution comparison](docs/figures/submission_distribution_compare.png)
+
+#### Monthly Mean Profile (2021 Test Horizon)
+
+Shows seasonality shape consistency across generated submissions.
+
+![Monthly profile by submission](docs/figures/submission_monthly_profile.png)
+
+#### Train Seasonality Heatmap
+
+Mean target intensity by month and half-hour slot, showing combined daily and annual seasonality patterns.
+
+![Train seasonality heatmap](docs/figures/train_seasonality_heatmap.png)
+
+### Extra Notes
+
+- The final submission has slightly lower spread (`std`) than direct/component candidates, suggesting a somewhat smoother forecast profile.
+- The component and direct submissions are still highly correlated (`~0.993`), but differ enough (`~1,005 MW` MAE) to produce meaningfully distinct trajectories.
+
