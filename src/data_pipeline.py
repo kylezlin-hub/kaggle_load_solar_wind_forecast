@@ -1,7 +1,11 @@
 import pandas as pd
 import numpy as np
 
-def clean_and_interpolate(df: pd.DataFrame, is_train: bool = True) -> pd.DataFrame:
+HALF_HOURS_PER_DAY = 48
+HALF_HOURS_PER_WEEK = 7 * HALF_HOURS_PER_DAY
+
+
+def clean_and_interpolate(df: pd.DataFrame) -> pd.DataFrame:
     """
     Cleans and interpolates missing/invalid data in the load/solar/wind dataset.
     """
@@ -37,8 +41,8 @@ def clean_and_interpolate(df: pd.DataFrame, is_train: bool = True) -> pd.DataFra
         df[col] = df[col].interpolate(method='linear', limit=8)
         
         # Step B: 1 week shift fallback
-        df[col] = df[col].fillna(df[col].shift(336))
-        df[col] = df[col].fillna(df[col].shift(-336))
+        df[col] = df[col].fillna(df[col].shift(HALF_HOURS_PER_WEEK))
+        df[col] = df[col].fillna(df[col].shift(-HALF_HOURS_PER_WEEK))
         
         # Step C: Median fallback
         if df[col].isnull().sum() > 0:
@@ -65,11 +69,12 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
     df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12.0)
     df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12.0)
     
-    # 2. Lag Features (Weather features only); We can add more lag features here. Since we have weather forecast, technically we can also try lead features
+    # 2. Lag Features (Weather features only)
+    # 30-minute data frequency -> 1 day = 48 steps, 2 days = 96 steps, 1 week = 336 steps.
     for col in ['temperature', 'nebulosity', 'wind']:
-        df[f'{col}_lag_1d'] = df[col].shift(24)
-        df[f'{col}_lag_2d'] = df[col].shift(48)
-        df[f'{col}_lag_1w'] = df[col].shift(336)
+        df[f'{col}_lag_1d'] = df[col].shift(HALF_HOURS_PER_DAY)
+        df[f'{col}_lag_2d'] = df[col].shift(2 * HALF_HOURS_PER_DAY)
+        df[f'{col}_lag_1w'] = df[col].shift(HALF_HOURS_PER_WEEK)
         
     # 3. Rolling Window Statistics (6 Hours = 12 half-hours)
     for col in ['temperature', 'wind']:
@@ -84,6 +89,23 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
     df['wind_cube'] = df['wind'] ** 3
     
     # Backfill the NaNs created by lagging/rolling at the very start of the dataset
-    df = df.fillna(method='bfill')
+    df = df.bfill()
     
     return df
+
+
+def get_base_features() -> list[str]:
+    """Return the canonical feature list used for model training/inference."""
+    return [
+        'month', 'tod', 'week_number', 'temperature', 'nebulosity', 'wind',
+        'day_type_week', 'day_type_jf', 'day_type_week_jf',
+        'period_holiday', 'period_christmas', 'period_summer',
+        'nebulosity_by_solar_power_weights', 'wind_by_wind_power_weights',
+        'tod_sin', 'tod_cos', 'month_sin', 'month_cos',
+        'temperature_lag_1d', 'temperature_lag_1w',
+        'nebulosity_lag_1d', 'nebulosity_lag_1w',
+        'wind_lag_1d', 'wind_lag_1w',
+        'temperature_rolling_mean_6h', 'temperature_rolling_std_6h',
+        'wind_rolling_mean_6h', 'wind_rolling_std_6h',
+        'temp_x_hour', 'wind_sq', 'wind_cube'
+    ]

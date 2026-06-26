@@ -137,8 +137,75 @@ Mean target intensity by month and half-hour slot, showing combined daily and an
 
 ![Train seasonality heatmap](docs/figures/train_seasonality_heatmap.png)
 
+### Additional Diagnostics (2026-06-26)
+
+Using the latest submission candidates in this repository, the following additional diagnostics were generated and saved to:
+
+- `docs/submission_extra_stats.csv`
+- `docs/figures/submission_pairwise_mae_heatmap.png`
+- `docs/figures/submission_component_minus_direct_14d.png`
+
+#### Component vs Direct Disagreement Summary
+
+| Pair | Mean Abs Diff (MW) | P50 Abs Diff (MW) | P90 Abs Diff (MW) | P95 Abs Diff (MW) | Max Abs Diff (MW) |
+|---|---:|---:|---:|---:|---:|
+| component vs direct | 1,005.19 | 802.76 | 2,112.12 | 2,626.63 | 7,146.55 |
+
+Interpretation: while average disagreement is around `1,005 MW`, tail disagreement can exceed `7,000 MW`, which means blending or calendar-conditioned weighting can still materially change final trajectories.
+
+#### Pairwise MAE Heatmap Across Submission Vectors
+
+This heatmap makes it easier to compare candidate distance at a glance and identify near-duplicates.
+
+![Pairwise MAE heatmap](docs/figures/submission_pairwise_mae_heatmap.png)
+
+#### Component Minus Direct Delta (First 14 Days)
+
+This chart isolates where component and direct methods diverge at the start of the test horizon.
+
+![Component minus direct delta first 14 days](docs/figures/submission_component_minus_direct_14d.png)
+
 ### Extra Notes
 
 - The final submission has slightly lower spread (`std`) than direct/component candidates, suggesting a somewhat smoother forecast profile.
 - The component and direct submissions are still highly correlated (`~0.993`), but differ enough (`~1,005 MW` MAE) to produce meaningfully distinct trajectories.
+
+## Experiment And Submission Logging
+
+The training and submission scripts now support automatic CSV logging so each run is traceable.
+
+### Baseline evaluation logs
+
+- Script: `src/baseline_models.py`
+- Default log file: `docs/experiment_log.csv`
+- Logged fields include:
+  - run metadata (`run_id`, `run_ts_utc`, `scope`, `split_date`)
+  - model config (`model_type`, `approach`)
+  - split sizes (`train_size`, `val_size`)
+  - metrics (`mae`, `rmse`, `mape`)
+  - winner markers (`winner_on_mae`, `is_winner`)
+
+Example commands:
+
+- `python src/baseline_models.py`
+- `python src/baseline_models.py --rolling-splits 3 --val-months 6`
+- `python src/baseline_models.py --log-path docs/my_experiment_log.csv`
+- `python src/baseline_models.py --disable-log`
+
+### Submission generation logs
+
+- Script: `src/generate_submission.py`
+- Default log file: `docs/submission_run_log.csv`
+- Logged fields include:
+  - run metadata (`run_id`, `run_ts_utc`)
+  - generation config (`approach`, `model_type`, `blend_weight_component`)
+  - output details (`out_path`, `rows`)
+  - prediction summary statistics (`pred_mean`, `pred_std`, `pred_min`, `pred_p05`, `pred_median`, `pred_p95`, `pred_max`)
+
+Example commands:
+
+- `python src/generate_submission.py --approach component --model-type lgbm`
+- `python src/generate_submission.py --approach blend --blend-weight-component 0.7`
+- `python src/generate_submission.py --log-path docs/my_submission_run_log.csv`
+- `python src/generate_submission.py --disable-log`
 
