@@ -87,31 +87,7 @@ All summary artifacts are saved in:
 - `docs/submission_stats.csv`
 - `docs/submission_agreement.csv`
 
-### Submission Distribution Summary
 
-| Submission | Rows | Mean (MW) | Std (MW) | Min | P05 | Median | P95 | Max |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| component | 17,520 | 46,950.77 | 10,836.27 | 24,258.32 | 32,430.41 | 44,486.98 | 67,520.33 | 83,500.17 |
-| direct | 17,520 | 46,718.18 | 10,876.00 | 25,904.60 | 32,375.08 | 43,917.75 | 67,352.32 | 81,501.59 |
-| final_submission | 17,520 | 47,016.24 | 10,446.88 | 25,508.18 | 32,885.01 | 44,952.16 | 67,298.09 | 82,004.13 |
-| lgbm_baseline | 17,520 | 46,718.18 | 10,876.00 | 25,904.60 | 32,375.08 | 43,917.75 | 67,352.32 | 81,501.59 |
-
-### Pairwise Submission Agreement
-
-Vector agreement is measured using MAE between two prediction vectors and Pearson correlation:
-
-| Left | Right | MAE Between Predictions (MW) | Correlation |
-|---|---|---:|---:|
-| direct | lgbm_baseline | 0.00 | 1.0000 |
-| direct | component | 1,005.19 | 0.9930 |
-| component | lgbm_baseline | 1,005.19 | 0.9930 |
-| component | final_submission | 1,859.65 | 0.9709 |
-| direct | final_submission | 1,973.72 | 0.9688 |
-| lgbm_baseline | final_submission | 1,973.72 | 0.9688 |
-
-Observation: `submission_lgbm_baseline.csv` and `submission_approach1_direct.csv` are identical in this repository snapshot.
-
-### New Graphs
 
 #### Forecast Comparison (First 14 Days)
 
@@ -137,21 +113,6 @@ Mean target intensity by month and half-hour slot, showing combined daily and an
 
 ![Train seasonality heatmap](docs/figures/train_seasonality_heatmap.png)
 
-### Additional Diagnostics (2026-06-26)
-
-Using the latest submission candidates in this repository, the following additional diagnostics were generated and saved to:
-
-- `docs/submission_extra_stats.csv`
-- `docs/figures/submission_pairwise_mae_heatmap.png`
-- `docs/figures/submission_component_minus_direct_14d.png`
-
-#### Component vs Direct Disagreement Summary
-
-| Pair | Mean Abs Diff (MW) | P50 Abs Diff (MW) | P90 Abs Diff (MW) | P95 Abs Diff (MW) | Max Abs Diff (MW) |
-|---|---:|---:|---:|---:|---:|
-| component vs direct | 1,005.19 | 802.76 | 2,112.12 | 2,626.63 | 7,146.55 |
-
-Interpretation: while average disagreement is around `1,005 MW`, tail disagreement can exceed `7,000 MW`, which means blending or calendar-conditioned weighting can still materially change final trajectories.
 
 #### Pairwise MAE Heatmap Across Submission Vectors
 
@@ -165,47 +126,5 @@ This chart isolates where component and direct methods diverge at the start of t
 
 ![Component minus direct delta first 14 days](docs/figures/submission_component_minus_direct_14d.png)
 
-### Extra Notes
 
-- The final submission has slightly lower spread (`std`) than direct/component candidates, suggesting a somewhat smoother forecast profile.
-- The component and direct submissions are still highly correlated (`~0.993`), but differ enough (`~1,005 MW` MAE) to produce meaningfully distinct trajectories.
-
-## Experiment And Submission Logging
-
-The training and submission scripts now support automatic CSV logging so each run is traceable.
-
-### Baseline evaluation logs
-
-- Script: `src/baseline_models.py`
-- Default log file: `docs/experiment_log.csv`
-- Logged fields include:
-  - run metadata (`run_id`, `run_ts_utc`, `scope`, `split_date`)
-  - model config (`model_type`, `approach`)
-  - split sizes (`train_size`, `val_size`)
-  - metrics (`mae`, `rmse`, `mape`)
-  - winner markers (`winner_on_mae`, `is_winner`)
-
-Example commands:
-
-- `python src/baseline_models.py`
-- `python src/baseline_models.py --rolling-splits 3 --val-months 6`
-- `python src/baseline_models.py --log-path docs/my_experiment_log.csv`
-- `python src/baseline_models.py --disable-log`
-
-### Submission generation logs
-
-- Script: `src/generate_submission.py`
-- Default log file: `docs/submission_run_log.csv`
-- Logged fields include:
-  - run metadata (`run_id`, `run_ts_utc`)
-  - generation config (`approach`, `model_type`, `blend_weight_component`)
-  - output details (`out_path`, `rows`)
-  - prediction summary statistics (`pred_mean`, `pred_std`, `pred_min`, `pred_p05`, `pred_median`, `pred_p95`, `pred_max`)
-
-Example commands:
-
-- `python src/generate_submission.py --approach component --model-type lgbm`
-- `python src/generate_submission.py --approach blend --blend-weight-component 0.7`
-- `python src/generate_submission.py --log-path docs/my_submission_run_log.csv`
-- `python src/generate_submission.py --disable-log`
 
